@@ -19,6 +19,10 @@ jobs:
       run: |
         pip install -r requirements.txt
 
+        corpid='${{ secrets.CORPID }}'
+        secret='${{ secrets.SECRET }}'
+        agentid='${{ secrets.AGENTID}}'
+        toparty='${{ secrets.TOPARTY}}'
 
         user='${{ secrets.USER }}'
         pwd='${{ secrets.PASSWD }}'
@@ -44,6 +48,10 @@ jobs:
         for ((i=0;i<$user_num;i++))
         do
         python3 bug_upload.py <<EOF
+        ${corpid}
+        ${secret}
+        ${agentid}
+        ${toparty}
         ${user_list[$i]}
         ${pwd_list[$i]}
         EOF

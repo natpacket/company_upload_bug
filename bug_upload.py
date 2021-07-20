@@ -13,6 +13,56 @@ from requests_toolbelt.multipart.encoder import MultipartEncoder
 logger.basicConfig(level=logger.INFO)
 
 
+class WXMsg:
+
+    def __init__(self, corpid, secret, agentid):
+        self.corpid = corpid
+        self.secret = secret
+        self.agentid = agentid
+        self.access_token = None
+
+    def get_token(self):
+        access_token = None
+        try:
+            url = 'https://qyapi.weixin.qq.com/cgi-bin/gettoken'
+            params = {"corpid": self.corpid, "corpsecret": self.secret}
+            resp = requests.get(url=url, params=params)
+            # print(resp.text)
+            access_token = resp.json().get('access_token')
+            self.access_token = access_token
+            # print(access_token)
+        except Exception as e:
+            print('error:', e)
+        # pass
+        return access_token
+
+    def send_msg(self, title=None, content=None, touser='@all', toparty=None, access_token=None):
+        if access_token is None:
+            self.get_token()
+            print(self.access_token)
+            access_token = self.access_token
+        url = f'https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token={access_token}'
+        # print(url)
+        payload = {
+            "touser": touser,
+            "toparty": toparty,
+            # "totag": "TagID1 | TagID2",
+            "msgtype": "textcard",
+            "agentid": self.agentid,
+            "textcard": {
+                "title": title,
+                "description": content,
+                "url": "URL",
+                "btntxt": ""
+            },
+            "enable_id_trans": 0,
+            "enable_duplicate_check": 0,
+            "duplicate_check_interval": 1800
+        }
+        resp = requests.post(url=url, json=payload)
+        print(resp.text)
+
+
 def res_encrypt(plain, public_key):
     rsakey = RSA.importKey(str(public_key))
     cipher = Cipher_pkcs1_v1_5.new(rsakey)
@@ -120,6 +170,10 @@ def upload_bug(url, token, json):
 
 
 if __name__ == '__main__':
+    corpid = input('公司id:')
+    secret = input('微信接口密文:')
+    agentid = input('微信应用id:')
+    toparty = input('部门id:')
     login_url = 'https://news.cninct.com/JiJianTong?op=Login'
     url_pic = 'https://news.cninct.com/JiJianTong?op=UploadFileModule'
     url_bug = 'https://news.cninct.com/JiJianTong?op=UploadFeedbackSuggestion'
@@ -130,17 +184,28 @@ if __name__ == '__main__':
     token_cninct = login(url=login_url, user=user, passwd=passwd)
     # 图片上传
     res = upload_pic(url=url_pic, token=token_cninct, pic_dir=pic_dir)
-    logger.info('图片上传状态：%s', res)
-    pics_path = ','.join([_['file_name'] for _ in res])
-    # bug提交
-    payload = {"suggestion": "nothing to say", "suggestion_article_id_union": 0, "suggestion_article_type": 0,
-               "suggestion_device": "MI 9", "suggestion_device_version": "安卓7.1.2",
-               "suggestion_pic": f"{pics_path}",
-               "suggestion_tel": "", "suggestion_type": 0, "suggestion_version": "5.1.2"}
-    msg = upload_bug(url=url_bug, token=token_cninct, json=payload)
-    # print(msg)
-    logger.info('bug上传状态：%s', msg)
-    # print(res)
-    # pic_paths = [os.path.join(pic_dir, name) for root, dir, files in os.walk(pic_dir) for name in files]
-    # three_path = random.sample(pic_paths, 3)
-    # print(three_path[])
+    if res != 'error':
+        logger.info('图片上传状态：%s', res)
+        pics_path = ','.join([_['file_name'] for _ in res])
+        # bug提交
+        payload = {"suggestion": "nothing to say", "suggestion_article_id_union": 0, "suggestion_article_type": 0,
+                   "suggestion_device": "MI 9", "suggestion_device_version": "安卓7.1.2",
+                   "suggestion_pic": f"{pics_path}",
+                   "suggestion_tel": "", "suggestion_type": 0, "suggestion_version": "5.1.2"}
+        msg = upload_bug(url=url_bug, token=token_cninct, json=payload)
+        # print(msg)
+        logger.info('bug上传状态：%s', msg)
+        wx = WXMsg(corpid, secret, agentid)
+        if msg != 'error':
+            message = '√\n\nbug上传完成！\n今天也是元气满满的一天！\n┗|｀O′|┛ 嗷~~\n'
+        else:
+            message = 'X\n\nbug上传失败！\n请检查网络或者账号！\n今天很丧呢！┗|｀O′|┛ 嗷~~\n'
+    else:
+        message = 'X\n\nbug上传失败！\n请检查网络或者账号！\n今天很丧呢！┗|｀O′|┛ 嗷~~\n'
+    content = f'*{user}* 以下是你本周的bug上传情况：\n\n --------\n\n'
+    content += f'bug上传     {message}\n'
+    content += '--------'
+    # check_time = time.strftime("%H:%M:%S", time.localtime())
+    # check_date = time.strftime("%Y-%m-%d", time.localtime())
+    # print(f'日期：{check_date}时间：{check_time}')
+    wx.send_msg(title='每周bug上传任务', content=content, toparty=toparty)
