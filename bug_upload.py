@@ -174,6 +174,7 @@ if __name__ == '__main__':
     secret = input('微信接口密文:')
     agentid = input('微信应用id:')
     toparty = input('部门id:')
+    touser = input('微信用户名:')
     login_url = 'https://news.cninct.com/JiJianTong?op=Login'
     url_pic = 'https://news.cninct.com/JiJianTong?op=UploadFileModule'
     url_bug = 'https://news.cninct.com/JiJianTong?op=UploadFeedbackSuggestion'
@@ -208,4 +209,4 @@ if __name__ == '__main__':
     # check_time = time.strftime("%H:%M:%S", time.localtime())
     # check_date = time.strftime("%Y-%m-%d", time.localtime())
     # print(f'日期：{check_date}时间：{check_time}')
-    wx.send_msg(title='每周bug上传任务', content=content, toparty=toparty)
+    wx.send_msg(title='每周bug上传任务', content=content, touser=touser)
