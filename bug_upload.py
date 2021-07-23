@@ -203,7 +203,7 @@ if __name__ == '__main__':
             message = 'X\n\nbug上传失败！\n请检查网络或者账号！\n今天很丧呢！┗|｀O′|┛ 嗷~~\n'
     else:
         message = 'X\n\nbug上传失败！\n请检查网络或者账号！\n今天很丧呢！┗|｀O′|┛ 嗷~~\n'
-    content = f'*{user}* 以下是你本周的bug上传情况：\n\n --------\n\n'
+    content = f'*{touser}* 以下是你本周的bug上传情况：\n\n --------\n\n'
     content += f'bug上传     {message}\n'
     content += '--------'
     # check_time = time.strftime("%H:%M:%S", time.localtime())
