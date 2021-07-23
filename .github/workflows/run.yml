@@ -2,7 +2,7 @@ name: 公司app的bug提交
 
 on:
   watch:
-    types: stared
+    types: started
   schedule:
     - cron: '0 10 * * 3'
 
