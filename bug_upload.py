@@ -3,6 +3,7 @@ import requests
 import random
 import logging as logger
 import os
+import json
 import base64
 import hashlib
 import string
@@ -167,6 +168,55 @@ def upload_bug(url, token, json):
     except Exception as e:
         logger.info(e)
         return 'error'
+
+
+def main(a, b):
+    # corpid = input('公司id:')
+    # secret = input('微信接口密文:')
+    # agentid = input('微信应用id:')
+    # # toparty = input('部门id:')
+    # touser = input('微信用户名:')
+    with open(file='./config.json', encoding='utf-8') as f:
+        data = json.loads(f.read())
+    corpid = data.get('corpid')
+    secret = data.get('secret')
+    agentid = data.get('agentid')
+    touser = data.get('touser')
+    user = data.get('user')
+    passwd = data.get('passwd')
+    login_url = 'https://news.cninct.com/JiJianTong?op=Login'
+    url_pic = 'https://news.cninct.com/JiJianTong?op=UploadFileModule'
+    url_bug = 'https://news.cninct.com/JiJianTong?op=UploadFeedbackSuggestion'
+    pic_dir = 'pics'
+    # token_cninct = 'Od5YkZbicy45P/3YuragfWa4J9oY/Juhzos9ZszwEzzWwzPSTkZPuW6CwkV3BTt+hnvAG3KP4bLbNPmn3dKzQvaX7jbHMQ91XKqqHrnKXfmHaeLew4dTLH0hE4QomKlqzVZvxzQs70g1/VBGk9XOjomg1UMraN6aKx9v+2ZQQ2o='
+    token_cninct = login(url=login_url, user=user, passwd=passwd)
+    # 图片上传
+    res = upload_pic(url=url_pic, token=token_cninct, pic_dir=pic_dir)
+    if res != 'error':
+        logger.info('图片上传状态：%s', res)
+        pics_path = ','.join([_['file_name'] for _ in res])
+        # bug提交
+        payload = {"suggestion": "nothing to say", "suggestion_article_id_union": 0, "suggestion_article_type": 0,
+                   "suggestion_device": "MI 9", "suggestion_device_version": "安卓7.1.2",
+                   "suggestion_pic": f"{pics_path}",
+                   "suggestion_tel": "", "suggestion_type": 0, "suggestion_version": "5.1.2"}
+        msg = upload_bug(url=url_bug, token=token_cninct, json=payload)
+        # print(msg)
+        logger.info('bug上传状态：%s', msg)
+        wx = WXMsg(corpid, secret, agentid)
+        if msg != 'error':
+            message = '√\n\nbug上传完成！\n今天也是元气满满的一天！\n┗|｀O′|┛ 嗷~~\n'
+        else:
+            message = 'X\n\nbug上传失败！\n请检查网络或者账号！\n今天很丧呢！┗|｀O′|┛ 嗷~~\n'
+    else:
+        message = 'X\n\nbug上传失败！\n请检查网络或者账号！\n今天很丧呢！┗|｀O′|┛ 嗷~~\n'
+    content = f'*{touser}* 以下是你本周的bug上传情况：\n\n --------\n\n'
+    content += f'bug上传     {message}\n'
+    content += '--------'
+    # check_time = time.strftime("%H:%M:%S", time.localtime())
+    # check_date = time.strftime("%Y-%m-%d", time.localtime())
+    # print(f'日期：{check_date}时间：{check_time}')
+    wx.send_msg(title='每周bug上传任务', content=content, touser=touser)
 
 
 if __name__ == '__main__':

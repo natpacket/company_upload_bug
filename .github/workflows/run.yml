@@ -1,8 +1,10 @@
 name: 公司app的bug提交
 
 on:
-  schedule:
-    - cron: '0 10 * * 3'
+  watch:
+    types: started
+#  schedule:
+#    - cron: '0 10 * * 3'
 
 jobs:
   build:
@@ -17,6 +19,7 @@ jobs:
           python-version: 3.7
       - name: 上传
         run: |
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
 
           corpid='${{ secrets.CORPID }}'
