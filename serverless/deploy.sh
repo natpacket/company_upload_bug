@@ -1,6 +1,6 @@
 # 将serverless服务需要的文件拷贝进serverless文件夹
 echo "开始复制文件..."
-cp pics ./serverless
+cp pics/ ./serverless
 cp config.json ./serverless
 cp bug_upload.py ./serverless
 cp requirements.txt ./serverless
