@@ -196,8 +196,8 @@ def main(a, b):
         logger.info('图片上传状态：%s', res)
         pics_path = ','.join([_['file_name'] for _ in res])
         # bug提交
-        payload = {"suggestion": "nothing to say", "suggestion_article_id_union": 0, "suggestion_article_type": 0,
-                   "suggestion_device": "MI 9", "suggestion_device_version": "安卓7.1.2",
+        payload = {"suggestion": ".", "suggestion_article_id_union": 0, "suggestion_article_type": 0,
+                   "suggestion_device": "iphone 13 pro max", "suggestion_device_version": "ios 15.1",
                    "suggestion_pic": f"{pics_path}",
                    "suggestion_tel": "", "suggestion_type": 0, "suggestion_version": "5.1.2"}
         msg = upload_bug(url=url_bug, token=token_cninct, json=payload)
