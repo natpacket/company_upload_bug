@@ -1,8 +1,8 @@
 name: 公司app的bug提交
 
 on:
-   schedule:
-     - cron: '30 1 * * 3'
+#   schedule:
+#     - cron: '30 1 * * 3'
   workflow_dispatch:
 
 
